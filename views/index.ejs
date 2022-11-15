@@ -1,0 +1,80 @@
+<% let selectedTable %>
+<script>
+  async function doRequest(selectedTableId, text) {
+
+    let url = 'http://localhost:3000/create-record';
+    let data = {'tableId': selectedTableId, 'text': text};
+
+    let res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+
+        // let text = await res.text();
+        // return text;
+
+        let ret = await res.json();
+        console.log('ret', ret);
+        return ret;
+
+    } else {
+        return `HTTP error: ${res.status}`;
+    }
+  }
+
+  function createRecord(selectedTableId, text) {
+    console.log('createRecord '+selectedTableId+' '+text);
+    doRequest(selectedTableId, text).then(data => {
+      console.log('result', data);
+    });
+  }
+</script>
+<div class="bg-violet-600 text-white py-2 px-2">
+    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+        <% tables.forEach((table) => {
+            if(selectedTableId === table.id) {
+                selectedTable = table;
+            %>
+                <a href="/?tableId=<%= table.id %>" class="text-black p-2 rounded bg-white text-violet-600 hover:bg-gray-100 hover:text-violet-600"><%= table.id %></a>
+           <% } else { %> 
+                <a href="/?tableId=<%= table.id %>" class="text-white p-2 rounded hover:bg-gray-100 hover:text-violet-600"><%= table.id %></a>
+        <% }}) %>
+    </div>
+</div>
+<div class="mx-auto max-w-7xl py-5 px-2 sm:px-6 lg:px-8">
+    <table class="border-collapse table-fixed w-full text-sm hover:table-fixed border border-slate-400">
+        <thead>
+          <tr>
+            <% selectedTable.fields.forEach((field) => { %>
+            <th class="border border-slate-300 border-b font-medium p-4 text-slate-400 text-left"><%= field.id %></th>
+            <% }) %>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <% selectedTable %>
+          <% selectedTable.records.forEach((record) => { %>
+          <tr class="odd:bg-white even:bg-slate-50 hover:bg-slate-100">
+            <%# record.forEach((field) => { %>
+            <td class="border border-slate-300 p-4 text-slate-500">
+              <%= record.fields.id %>
+              <input class="p-2 mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm shadow-sm placeholder-slate-400" type="text" value="<%#= record.id %>" />
+            </td>
+            <%# }) %>
+          </tr>
+          <% }) %>
+          <tr class="hover:bg-slate-100">
+            <td class="border border-slate-300 text-slate-500">
+              <input class="p-2 mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm shadow-sm placeholder-slate-400" data-selectedTableId="<%= selectedTableId %>" type="text" value="" onblur="createRecord(this.dataset.selectedtableid, this.value)" />
+            </td>
+            <td class="border border-slate-300 text-slate-500">
+              <input class="p-2 mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm shadow-sm placeholder-slate-400" data-selectedTableId="<%= selectedTableId %>" type="text" value="" onblur="createRecord(this.dataset.selectedtableid, this.value)" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+</div>
